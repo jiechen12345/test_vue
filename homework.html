@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>vue-demo</title>
+    <!--引入vue.js-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
+    <script src="public/js/jquery-3.7.1.js"></script>
+    <!-- 測試bundle差異 -->
+    <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div id="app" class="container mt-3">
+      <div class="row">
+        <div class="col-9">
+          <table id="tabel" class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">科目</th>
+                <th scope="col">分數</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- for迴圈寫法 -->
+              <tr v-for="(item,index) in list" :key="item.id">
+                <td>
+                  <div class="custom-control custom-checkbox">
+                    <!--v bind :id寫法  v-model綁定-->
+                    <input type="checkbox" class="custom-control-input" :id="'check-' + item.id" v-model="item.isChecked" />
+                  </div>
+                </td>
+                <td>{{item.subject}}</td>
+                <!--v bind :style寫法  btw class寫法 :class="{ 'nav-link': true,'disabled':index==disabledIndex}"  -->
+                <!-- 多個物件要切換 就陣列 如下 -->
+                <!-- <td :style="[item.score < 60 ? { color: 'red' } : { color: 'black' }]">{{ item.value }}</td> -->
+                <!--插直表達是寫法  -->
+                <td :style="{ color: item.score < 60 ? 'red' : 'black' }">{{item.score}}</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <b>總分</b>
+                </td>
+                <!--computed template寫法  -->
+                <td>{{totalScore}}</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <b>平均</b>
+                </td>
+                <!--computed template寫法  -->
+                <td>{{avgScore}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-3">
+          <div class="mb-3">
+            <input type="text" class="form-control" v-model.trim="PI_subject" :class="{ 'is-invalid': subjectInvalid && isSubjectValidated }" @blur="validateSubject" placeholder="科目" />
+            <div class="invalid-feedback">科目必填</div>
+          </div>
+          <div class="mb-3">
+            <input type="text" class="form-control" v-model.number="PI_score" :class="{ 'is-invalid':  scoreInvalid && isScoreValidated }" @blur="validateScore" placeholder="分數" />
+            <div class="invalid-feedback">分數必填</div>
+          </div>
+          <div class="d-flex justify-content-around">
+            <!--事件&methods template寫法  -->
+            <button type="button" class="btn btn-primary" @click="add">新增</button>
+            <button type="button" class="btn btn-danger" @click="remove">刪除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const obj = new Vue({
+        el: '#app',
+        data: {
+          PI_subject: '',
+          PI_score: '',
+          list: [
+            { id: 1, subject: '國文', score: 80, isChecked: false },
+            { id: 2, subject: '英文', score: 70, isChecked: false },
+            { id: 3, subject: '數學', score: 59, isChecked: false },
+          ],
+          isSubjectValidated: false, //有無執行過驗證
+          isScoreValidated: false,
+          //也許讀取後端並沒有isChecked這個欄位，我們可自己增加這個屬性，跟template綁定監聽目前狀況
+          //list.map(item => ({ ...item, isChecked: false }))
+        },
+        computed: {
+          totalScore() {
+            return this.list.reduce((total, item) => total + parseInt(item.score), 0);
+          },
+          avgScore() {
+            //comuterd 可以當作屬性參數，totalScore直接能拿來用
+            return (this.totalScore / this.list.length).toFixed(2);
+          },
+          subjectInvalid() {
+            return !this.PI_subject;
+          },
+          scoreInvalid() {
+            return !this.PI_score;
+          },
+        },
+        methods: {
+          add() {
+            //註記有執行過驗證 避免一進到畫面就出現紅字
+            this.isSubjectValidated = true;
+            this.isScoreValidated = true;
+
+            if (!this.PI_subject || !this.PI_score) {
+              return;
+            }
+
+            //通常DB做 這邊暫時幫它生成ID
+            const newId = +new Date();
+
+            const newItem = {
+              id: newId,
+              subject: this.PI_subject,
+              score: this.PI_score,
+              isChecked: false,
+            };
+            //通常會送請求過去後端，再重新讀取一次list
+            this.list.push(newItem);
+            //清空輸入框
+            this.PI_subject = '';
+            this.PI_score = '';
+            //回到初始化，代表沒被驗證過不用出現紅色
+            this.isSubjectValidated = false;
+            this.isScoreValidated = false;
+          },
+
+          remove() {
+            const index = this.list.findIndex((item) => {
+              return item.isChecked;
+            });
+            if (index !== -1) {
+              //這邊也可以做成call api 通知後端刪除
+              this.list.splice(index, 1);
+            }
+          },
+          validateSubject() {
+            //註記有執行過驗證 避免一進到畫面就出現紅字
+            this.isSubjectValidated = true;
+          },
+          validateScore() {
+            //註記有執行過驗證 避免一進到畫面就出現紅字
+            this.isScoreValidated = true;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,1 +1,52 @@
-..
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>vue-demo</title>
+    <!--引入vue.js-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
+    <script src="public/js/jquery-3.7.1.js"></script>
+    <!-- 測試bundle差異 -->
+    <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div id="app" class="container mt-3">
+      <div id="app">
+        姓:<input type="text" v-model="PI_FIRST_NAME" /> 名:<input type="text" v-model="PI_LAST_NAME" /> =
+        <span>{{fullName}}</span>
+
+        <button @click="changeName">change Name</button>
+      </div>
+    </div>
+    <script>
+      const obj = new Vue({
+        el: '#app',
+        data: {
+          PI_FIRST_NAME: '陳',
+          PI_LAST_NAME: '杰',
+        },
+        computed: {
+          fullName: {
+            get() {
+              //等於沒寫get set的邏輯寫這
+              return this.PI_FIRST_NAME + this.PI_LAST_NAME;
+            },
+            set(value) {
+              this.PI_FIRST_NAME = value.slice(0, 1);
+              this.PI_LAST_NAME = value.slice(1);
+            },
+          },
+        },
+        methods: {
+          changeName() {
+            //不是去改輸入框，直接改computed結果再利用結果v-model 連動輸入框，
+            //除了會報錯以外從2個字變成3個字邏輯computed也不知道怎麼判斷
+            this.fullName = '陳柏良';
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>watch2 deep</title>
+    <!--引入vue.js-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
+    <script src="public/js/jquery-3.7.1.js"></script>
+    <!-- 測試bundle差異 -->
+    <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container mt-3">
+        <div class="row mb-3">
+          <div class="col-md-2">
+            <select class="form-select" v-model="inputObj.lang">
+              <option value="en">英文</option>
+              <option value="it">義大利</option>
+              <option value="fr">法文</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <textarea class="form-control" v-model="inputObj.originalText" placeholder="請輸入文字" rows="5"></textarea>
+          </div>
+          <div class="col-md-6">
+            <textarea class="form-control" :value="translatedText" disabled rows="5"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const obj = new Vue({
+        el: '#app',
+        data: {
+          inputObj: {
+            lang: 'en',
+            originalText: '',
+          },
+          translatedText: '',
+        },
+        computed: {},
+        methods: {},
+        watch: {
+          //1.個別監聽
+          // 'inputObj.lang'(newVal) {
+          //   console.log('執行翻譯');
+          // const res = await axios.get('https://applet-base-api-t.itheima.net/api/translate/');
+          // },
+          // 'inputObj.originalText'(newVal) {
+          //   console.log('執行翻譯');
+          // },
+
+          //2.整個物件監聽
+          inputObj: {
+            deep: true, //深入監聽整個物件
+            //預設 watch 的函式需要等待它所偵測的值變動時，才會執行。但如果想一載入元件就執行 immediate: true,
+            // immediate: true,
+            async handler(newVal) {
+              console.log(newVal);
+              console.log('執行翻譯');
+              const res = await axios.get('https://applet-base-api-t.itheima.net/api/translate/');
+              this.translatedText = 'haha';
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
