@@ -8,42 +8,70 @@
     <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
     <script src="public/js/jquery-3.7.1.js"></script>
     <!-- 測試bundle差異 -->
+    <!-- <script src="public/bs/js/bootstrap.min.js"></script> -->
     <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <style>
+      .cart {
+        position: relative;
+        display: block;
+        text-align: center;
+        border-radius: 50%;
+        background-color: #d24714;
+        width: 50px;
+        height: auto;
+        bottom: 70;
+        left: 30;
+        color: #fff;
+      }
+    </style>
   </head>
   <body>
     <div id="app" class="container mt-3">
-      <div id="app">
-        姓:<input type="text" v-model="PI_FIRST_NAME" /> 名:<input type="text" v-model="PI_LAST_NAME" /> =
-        <span>{{fullName}}</span>
+      <div class="col-1">
+        <img src="public/img/cart.png" style="width: 60%" alt="" />
+        <span class="cart">${{totalPrice}}</span>
+      </div>
+      <div class="table-responsive-md">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>水果</th>
+              <th>價格</th>
+            </tr>
+          </thead>
 
-        <button @click="changeName">change Name</button>
+          <tr v-for="(item,index) in list" :key="item.id">
+            <td>{{item.name}}</td>
+            <td>{{item.price}}</td>
+          </tr>
+          <tr>
+            <td>總共</td>
+            <td>{{totalPrice}}</td>
+            <!-- 屬性不用加() -->
+          </tr>
+        </table>
       </div>
     </div>
     <script>
       const obj = new Vue({
         el: '#app',
         data: {
-          PI_FIRST_NAME: '陳',
-          PI_LAST_NAME: '杰',
+          list: [
+            { id: 1, name: '蘋果', price: 10 },
+            { id: 2, name: '香蕉', price: 12 },
+            { id: 3, name: '榴槤', price: 130 },
+          ],
         },
         computed: {
-          fullName: {
-            get() {
-              //等於沒寫get set的邏輯寫這
-              return this.PI_FIRST_NAME + this.PI_LAST_NAME;
-            },
-            set(value) {
-              this.PI_FIRST_NAME = value.slice(0, 1);
-              this.PI_LAST_NAME = value.slice(1);
-            },
-          },
-        },
-        methods: {
-          changeName() {
-            //不是去改輸入框，直接改computed結果再利用結果v-model 連動輸入框，
-            //除了會報錯以外從2個字變成3個字邏輯computed也不知道怎麼判斷
-            this.fullName = '陳柏良';
+          //計算屬性
+          totalPrice() {
+            console.log(`computed-----`);
+            //執行過就不會再重新算 因為有暫存
+            return this.list.reduce((sum, item) => {
+              return sum + item.price;
+            }, 0);
           },
         },
       });
