@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>LifecycleEvents</title>
+    <!--引入vue.js-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
+    <script src="public/js/jquery-3.7.1.js"></script>
+    <!-- 測試bundle差異 -->
+    <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <style></style>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <h3>{{title}}</h3>
+      <div>
+        <button @click="count--">-</button>
+        <span>{{count}}</span>
+        <button @click="count++">+</button>
+      </div>
+    </div>
+
+    <script>
+      const obj = new Vue({
+        el: '#app',
+        data: {
+          title: '計數器',
+          count: 0,
+        },
+        methods: {},
+        computed: {},
+        watch: {},
+        beforeCreate() {
+          console.log('Vue實例創建前', this.count);
+        },
+        created() {
+          console.log('Vue實例創建後', this.count);
+          //所以通常在這邊call後端要default資料
+        },
+        beforeMount() {
+          console.log('掛載前(渲染前)');
+          debugger;
+        },
+        mounted() {
+          console.log('掛載後(渲染後)');
+          //所以在這之後才可以操作DOM
+        },
+        beforeUpdate() {
+          console.log('beforeUpdate', document.querySelector('span').innerHTML);
+        },
+        updated() {
+          //修改畫面造成資料變化，或者資料變化造成修改畫面
+          console.log('updated', document.querySelector('span').innerHTML);
+        },
+       
+        beforeDestroy() {
+          console.log('beforeDestroy');
+          //通常會在這邊銷毀setTimeout...之類的應用函式
+        },
+        destroyed() {
+          console.log('destroyed');
+        },
+      });
+    </script>
+  </body>
+</html>

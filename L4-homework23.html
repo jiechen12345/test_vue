@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>vue-demo</title>
+    <title>fruit</title>
     <!--引入vue.js-->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
@@ -26,17 +26,22 @@
         right: 0;
         margin-top: 20px;
       }
+      .price {
+        font-family: fantasy;
+        font-size: xx-large;
+        color: chocolate;
+      }
     </style>
   </head>
   <body>
     <div id="app" class="container mt-3">
-      <!--1. v-show v-if用法 -->
       <div class="flex-column" v-if="fruitList.length>0">
         <div class="col">
           <table id="tabel" class="table table-bordered">
             <thead>
               <tr>
-                <th scope="col"><input type="checkbox" class="custom-control-input" /></th>
+                <!--1.  isAll綁定-->
+                <th scope="col"><input type="checkbox" v-model="isAll" class="custom-control-input" /></th>
                 <th scope="col"></th>
                 <th scope="col">品名</th>
                 <th scope="col">數量</th>
@@ -46,9 +51,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- for迴圈寫法 -->
-              <!--因為有"-" 所以不能寫 :class="{table-active:fruit.isChecked} -->
-              <!--這邊也可以看出vue 的作用，如果一般操作dom寫法要寫監聽 -->
               <tr v-for="(fruit,index) in fruitList" :key="fruit.id" :class="{'table-active':fruit.isChecked}">
                 <td style="width: 2%">
                   <div class="custom-control custom-checkbox">
@@ -61,33 +63,29 @@
                 </td>
                 <td>{{fruit.name}}</td>
                 <td>
-                  <input type="number" v-model="fruit.count" class="form-control" min="0" max="100" />
+                  <input type="number" v-model="fruit.count" class="form-control" min="1" max="100" />
                 </td>
                 <td>{{fruit.price}}</td>
-                <!-- 直接插值表達即可 -->
                 <td>{{fruit.count*fruit.price}}</td>
-                <td style="width: 3%"><button type="button" class="btn btn-danger" @click="remove">刪除</button></td>
+                <td style="width: 3%"><button type="button" class="btn btn-danger" @click="del(fruit.id)">刪除</button></td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <!--1. v-show v-if用法 -->
       <div v-else>
         <img :src="noItem" style="width: 100%; height: auto" alt="" />
       </div>
 
-      <div class="footer d-flex justify-content-end mb-3 me-5">
-        <div>總價:${{totalPrice}}</div>
+      <div class="footer d-flex justify-content-end mb-3">
+        <div class="col-2">總價&nbsp;:&nbsp;$&nbsp;<span class="price">{{totalPrice}}</span></div>
+        <div class="col-2"><button type="button" class="btn btn-primary" @click="del">結帳({{totalCount}})</button></div>
       </div>
     </div>
     <script>
       const obj = new Vue({
         el: '#app',
         data: {
-          PI_subject: '',
-          PI_score: '',
-          totalScore: '',
           noItem: './public/img/fruit/noitem.png',
           fruitList: [
             { id: 1, img: './public/img/fruit/apple.jpg', name: '蘋果', count: 2, price: 10, isChecked: true },
@@ -98,10 +96,61 @@
             { id: 6, img: './public/img/fruit/pitaya.jpg', name: '火龍果', count: 3, price: 32, isChecked: false },
             { id: 7, img: './public/img/fruit/strawberry.jpg', name: '草莓', count: 20, price: 11, isChecked: false },
           ],
+          //4.2 取出localStorage並轉回格式
+          // fruitList: JSON.parse(localStorage.getItem('list'))
         },
-        computed: { totalPrice() {} },
+        computed: {
+          //2.  isAll綁定-->
+          isAll: {
+            //2.1  如果每個都選中了要幫 isAll打勾，反之要取消打勾-->
+            //所以代表要set isAll 因此要使用完整寫法-->
+            get() {
+              //必須所有都ischecked true  isAll才會打勾
+              return this.fruitList.every((item) => item.isChecked);
+            },
+            set(newVal) {
+              //如果ture 就全true 如果false就全flase
+              this.fruitList.forEach((item) => (item.isChecked = newVal));
+            },
+          },
+          totalCount() {
+            //3. 累加固定用reduce 要熟悉寫法
+            //arr.reduce((sum,item)=>{},0)
+            return this.fruitList.reduce((sum, item) => {
+              if (item.isChecked) {
+                return sum + item.count;
+              } else {
+                return sum;
+              }
+            }, 0);
+          },
+          totalPrice() {
+            //同3.
+            return this.fruitList.reduce((sum, item) => {
+              if (item.isChecked) {
+                return sum + item.count * item.price;
+              } else {
+                return sum;
+              }
+            }, 0);
+          },
+        },
         methods: {
-          remove() {},
+          del(id) {
+            this.fruitList = this.fruitList.filter((item) => {
+              return item.id !== id;
+            });
+          },
+        },
+        watch: {
+          fruitList: {
+            deep: true,
+            handler(newVal) {
+              console.log(newVal);
+              //4.一有變化就將newVal轉JSON送後端(這邊是用localStorage示範)
+              localStorage.setItem('list', JSON.stringify(newVal));
+            },
+          },
         },
       });
     </script>

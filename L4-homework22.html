@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>fruit</title>
+    <!--引入vue.js-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
+    <script src="public/js/jquery-3.7.1.js"></script>
+    <!-- 測試bundle差異 -->
+    <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <style>
+      #tabel th,
+      #tabel td {
+        text-align: center; /* 上下置中 */
+        vertical-align: middle; /* 左右置中 */
+      }
+      #tabel td {
+        width: 4%;
+      }
+      .total-price {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-top: 20px;
+      }
+      .price {
+        font-family: fantasy;
+        font-size: xx-large;
+        color: chocolate;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container mt-3">
+      <!--1. v-show v-if用法 -->
+      <div class="flex-column" v-if="fruitList.length>0">
+        <div class="col">
+          <table id="tabel" class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col"><input type="checkbox" class="custom-control-input" /></th>
+                <th scope="col"></th>
+                <th scope="col">品名</th>
+                <th scope="col">數量</th>
+                <th scope="col">單價</th>
+                <th scope="col">小計</th>
+                <th scope="col">刪除</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 2.for迴圈寫法 -->
+              <!--3.因為有"-" 所以不能寫 :class="{table-active:fruit.isChecked} -->
+              <!--3.1 靜態class 可以跟動態分開寫 -->
+              <!--這邊也可以看出vue 的作用，如果一般操作dom寫法要寫監聽 -->
+              <tr v-for="(fruit,index) in fruitList" :key="fruit.id" class="ABC EDF" :class="{'table-active':fruit.isChecked}">
+                <td style="width: 2%">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" v-model="fruit.isChecked" />
+                  </div>
+                </td>
+
+                <td style="width: 2%">
+                  <img :src="fruit.img" style="width: 100%; height: auto" alt="" />
+                </td>
+                <td>{{fruit.name}}</td>
+                <td>
+                  <!-- 4.HTML number寫法 -->
+                  <input type="number" v-model="fruit.count" class="form-control" min="1" max="100" />
+                </td>
+                <td>{{fruit.price}}</td>
+                <!-- 5.直接插值表達即可 -->
+                <td>{{fruit.count*fruit.price}}</td>
+                <!-- 6.刪除 -->
+                <td style="width: 3%"><button type="button" class="btn btn-danger" @click="del(fruit.id)">刪除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!--1. v-show v-if用法 -->
+      <div v-else>
+        <img :src="noItem" style="width: 100%; height: auto" alt="" />
+      </div>
+
+      <div class="footer d-flex justify-content-end mb-3">
+        <div class="col-2">總價&nbsp;:&nbsp;$&nbsp;<span class="price">10</span></div>
+        <div class="col-2"><button type="button" class="btn btn-primary" @click="del">結帳(1)</button></div>
+      </div>
+    </div>
+    <script>
+      const obj = new Vue({
+        el: '#app',
+        data: {
+          noItem: './public/img/fruit/noitem.png',
+          fruitList: [
+            { id: 1, img: './public/img/fruit/apple.jpg', name: '蘋果', count: 2, price: 10, isChecked: true },
+            { id: 2, img: './public/img/fruit/banana.jpg', name: '香蕉', count: 2, price: 15, isChecked: false },
+            { id: 3, img: './public/img/fruit/cherry.jpg', name: '櫻桃', count: 90, price: 5, isChecked: false },
+            { id: 4, img: './public/img/fruit/durian.jpg', name: '榴槤', count: 180, price: 2, isChecked: false },
+            { id: 5, img: './public/img/fruit/orange.jpg', name: '柳丁', count: 10, price: 12, isChecked: false },
+            { id: 6, img: './public/img/fruit/pitaya.jpg', name: '火龍果', count: 3, price: 32, isChecked: false },
+            { id: 7, img: './public/img/fruit/strawberry.jpg', name: '草莓', count: 20, price: 11, isChecked: false },
+          ],
+        },
+        computed: { totalPrice() {} },
+        methods: {
+          del(id) {
+            this.fruitList = this.fruitList.filter((item) => {
+              return item.id !== id;
+            });
+          },
+        },
+   
+      });
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>vue-demo</title>
+    <title>fruit</title>
     <!--引入vue.js-->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
@@ -25,6 +25,11 @@
         top: 0;
         right: 0;
         margin-top: 20px;
+      }
+      .price {
+        font-family: fantasy;
+        font-size: xx-large;
+        color: chocolate;
       }
     </style>
   </head>
@@ -91,8 +96,9 @@
         <img src="./public/img/fruit/noitem.png" style="width: 100%; height: auto" alt="" />
       </div>
 
-      <div class="footer d-flex justify-content-end mb-3 me-5">
-        <div>總價: 100</div>
+      <div class="footer d-flex justify-content-end mb-3">
+        <div class="col-2">總價&nbsp;:&nbsp;$&nbsp;<span class="price">10</span></div>
+        <div class="col-2"><button type="button" class="btn btn-primary">結帳(1)</button></div>
       </div>
     </div>
     <script>
