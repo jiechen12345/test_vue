@@ -1,0 +1,269 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>fruit-改axios</title>
+    <!--引入vue.js-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="public/bs/css/bootstrap.css" />
+    <script src="public/js/jquery-3.7.1.js"></script>
+    <!-- 測試bundle差異 -->
+    <script src="public/bs/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <style>
+      #tabel th,
+      #tabel td {
+        text-align: center;
+        vertical-align: middle;
+      }
+      #tabel td {
+        width: 4%;
+      }
+      .total-price {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-top: 20px;
+      }
+      .price {
+        font-family: fantasy;
+        font-size: xx-large;
+        color: chocolate;
+      }
+    </style>
+    <script>
+      //這邊是模擬DB
+      var db_fruitList = [
+        { id: 1, img: './public/img/fruit/apple.jpg', name: '蘋果', count: 2, price: 10, isChecked: true },
+        { id: 2, img: './public/img/fruit/banana.jpg', name: '香蕉', count: 2, price: 15, isChecked: false },
+        { id: 3, img: './public/img/fruit/cherry.jpg', name: '櫻桃', count: 90, price: 5, isChecked: false },
+        { id: 4, img: './public/img/fruit/durian.jpg', name: '榴槤', count: 180, price: 2, isChecked: false },
+        { id: 5, img: './public/img/fruit/orange.jpg', name: '柳丁', count: 10, price: 12, isChecked: false },
+        { id: 6, img: './public/img/fruit/pitaya.jpg', name: '火龍果', count: 3, price: 32, isChecked: false },
+        { id: 7, img: './public/img/fruit/strawberry.jpg', name: '草莓', count: 20, price: 11, isChecked: false },
+      ];
+
+      //假裝這是HTTP請求器-axios
+      const axios = {
+        get: (url, options) => {
+          var modal = new bootstrap.Modal(document.getElementById('progressModal'), {
+            backdrop: 'static', // 禁止手動關閉
+            keyboard: false, // 禁止使用鍵盤
+          });
+          modal.show();
+          let progressValue = 0;
+          let interval = setInterval(function () {
+            progressValue += 10; // 每次增加20
+            if (progressValue <= 100) {
+              updateProgress(progressValue);
+            } else {
+              clearInterval(interval);
+            }
+          }, 200);
+
+          return new Promise((resolve, reject) => {
+            // 模擬一個隨機的請求延遲時間，介於 1 到 3 秒之間
+            const delay = Math.floor(Math.random() * 2000) + 1000;
+            const data = {
+              fruitList: db_fruitList,
+            };
+
+            setTimeout(() => {
+              const success = true;
+              if (success) {
+                clearInterval(interval);
+                updateProgress(100);
+                modal.hide();
+                // 模擬成功回應
+                resolve({
+                  data: { message: 'Request was successful!', ...data },
+                  status: 200,
+                  statusText: 'OK',
+                  headers: {},
+                  config: options,
+                  request: {},
+                });
+              } else {
+                updateProgress(100);
+                modal.hide();
+                reject({
+                  response: {
+                    data: { message: 'Request failed!' },
+                    status: 500,
+                    statusText: 'Internal Server Error',
+                    headers: {},
+                    config: options,
+                    request: {},
+                  },
+                });
+              }
+            }, delay);
+          });
+        },
+        delete: (id) => {
+          //3.模擬刪除DB資料
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              db_fruitList = db_fruitList.filter((item) => {
+                return item.id !== id;
+              });
+              resolve({ success: true });
+            }, 500);
+          });
+        },
+      };
+
+      //更新樣式
+      function updateProgress(value) {
+        let progressBar = document.querySelector('.progress-bar');
+        progressBar.style.width = value + '%';
+        progressBar.setAttribute('aria-valuenow', value);
+        if (value == 100) {
+          setTimeout(() => {
+            updateProgress(0);
+          }, 800);
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app" class="container mt-3">
+      <div class="flex-column" v-if="fruitList.length>0">
+        <div class="col">
+          <table id="tabel" class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col"><input type="checkbox" v-model="isAll" class="custom-control-input" /></th>
+                <th scope="col"></th>
+                <th scope="col">品名</th>
+                <th scope="col">數量</th>
+                <th scope="col">單價</th>
+                <th scope="col">小計</th>
+                <th scope="col">刪除</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(fruit,index) in fruitList" :key="fruit.id" :class="{'table-active':fruit.isChecked}">
+                <td style="width: 2%">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" v-model="fruit.isChecked" />
+                  </div>
+                </td>
+
+                <td style="width: 2%">
+                  <img :src="fruit.img" style="width: 100%; height: auto" alt="" />
+                </td>
+                <td>{{fruit.name}}</td>
+                <td>
+                  <input type="number" v-model="fruit.count" class="form-control" min="1" max="100" />
+                </td>
+                <td>{{fruit.price}}</td>
+                <td>{{fruit.count*fruit.price}}</td>
+                <!-- 3.刪除傳ID -->
+                <td style="width: 3%"><button type="button" class="btn btn-danger" @click="del(fruit.id)">刪除</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div v-else>
+        <!-- 4.讀取時不用顯示購物車無任何商品 -->
+        <img :src="noItem" v-show="!isLoading" style="width: 100%; height: auto" alt="" />
+      </div>
+
+      <div class="footer d-flex justify-content-end mb-3">
+        <div class="col-2">總價&nbsp;:&nbsp;$&nbsp;<span class="price">{{totalPrice}}</span></div>
+        <div class="col-2"><button type="button" class="btn btn-primary">結帳({{totalCount}})</button></div>
+      </div>
+    </div>
+    <!-- 2.BS之前教過的讀取條 -->
+    <div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered custom-modal">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="progress">
+              <!-- <div class="progress-bar" role="progressbar" style="width: 20%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div> -->
+              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const obj = new Vue({
+        el: '#app',
+        data: {
+          noItem: './public/img/fruit/noitem.png',
+          fruitList: [],
+          //4.讀取時不用顯示購物車無任何商品
+          isLoading: true,
+        },
+        computed: {
+          isAll: {
+            get() {
+              return this.fruitList.every((item) => item.isChecked);
+            },
+            set(newVal) {
+              this.fruitList.forEach((item) => (item.isChecked = newVal));
+            },
+          },
+          totalCount() {
+            return this.fruitList.reduce((sum, item) => {
+              if (item.isChecked) {
+                return sum + item.count;
+              } else {
+                return sum;
+              }
+            }, 0);
+          },
+          totalPrice() {
+            return this.fruitList.reduce((sum, item) => {
+              if (item.isChecked) {
+                return sum + item.count * item.price;
+              } else {
+                return sum;
+              }
+            }, 0);
+          },
+        },
+        methods: {
+          async queryList() {
+            
+            const res = await axios.get('https://test-api.com', {
+              params: {
+                test: true,
+              },
+            });
+            console.log(res.data);
+            // 4.讀取時不用顯示購物車無任何商品
+            this.isLoading = false;
+            this.fruitList = res.data.fruitList;
+          },
+          async del(id) {
+            //3.刪除DB資料
+            //正常寫法(`https://test-api.com${id}`);
+            // axios.delete(`https://test-api.com${id}`);
+            const res = await axios.delete(id);
+            if (res.success) {
+              this.queryList();
+            }
+          },
+        },
+        watch: {
+          fruitList: {
+            deep: true,
+            handler(newVal) {
+              console.log(newVal);
+              localStorage.setItem('list', JSON.stringify(newVal));
+            },
+          },
+        },
+        //1. 建立Vue實例後call後端要初始資料
+        created() {
+          //1. 因為要重複使用 methods
+          this.queryList();
+        },
+      });
+    </script>
+  </body>
+</html>

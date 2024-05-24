@@ -47,6 +47,7 @@
         mounted() {
           console.log('掛載後(渲染後)');
           //所以在這之後才可以操作DOM
+          //比方說進到畫面 就把游標focus 在某個DOM
         },
         beforeUpdate() {
           console.log('beforeUpdate', document.querySelector('span').innerHTML);
